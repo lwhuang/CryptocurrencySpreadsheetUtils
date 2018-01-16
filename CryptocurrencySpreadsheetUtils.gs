@@ -324,11 +324,96 @@ CoinMarketCap.prototype.getCoinPriceKey = function() {
 /**************************************************************************************/
 
 /**
+ * quoine API (https://api.quoine.com//products/)
+ 
+{
+"id":"1",
+"product_type":"CurrencyPair",
+"code":"CASH",
+"name":" CASH Trading",
+"market_ask":14540.03957,
+"market_bid":14528.16041,
+"indicator":-1,
+"currency":"USD",
+"currency_pair_code":"BTCUSD",
+"symbol":"$",
+"btc_minimum_withdraw":null,
+"fiat_minimum_withdraw":null,
+"pusher_channel":"product_cash_btcusd_1",
+"taker_fee":0.0,
+"maker_fee":0.0,
+"low_market_bid":14338.02563,
+"high_market_ask":15198.99,
+"volume_24h":1222.425638419999999988,
+"last_price_24h":15053.10679,
+"last_traded_price":14530.81604,
+"last_traded_quantity":0.00889657,
+"quoted_currency":"USD",
+"base_currency":"BTC",
+"disabled":false,
+"exchange_rate":1.0
+}
+*/
+
+
+function quoine() {
+  CryptoService.call(this, "https://api.quoine.com//products/");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+quoine.prototype = Object.create(CryptoService.prototype);
+quoine.prototype.constructor = quoine;
+
+//CryptoService.PROVIDERS["quoine"] = new quoine();
+
+/**
+ * Return URL for all coins
+ */
+quoine.prototype.getAllCoinsURL = function() {
+  return this.url;
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+quoine.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data) {
+    var coin = data.Data[i];
+    var symbol = coin.currency_pair_code;//.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+quoine.prototype.getCoinPriceKey = function() {
+  return "market_bid";
+}
+
+
+/**************************************************************************************/
+
+/**
  * Register Crypto API providers
  */
 var PROVIDERS = [
   new Coinbin(),
   new CoinMarketCap(),
+  new quoine(),
 ];
   
 /**
