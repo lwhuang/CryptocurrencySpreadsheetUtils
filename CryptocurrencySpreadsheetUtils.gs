@@ -380,8 +380,59 @@ quoine.prototype.getCoinPriceKey = function() {
 
 /**
  * Kucoin API (https://api.coinmarketcap.com/v1/)
+ https://api.kucoin.com/v1/open/tick
+ 
+ {"coinType":"KCS","trading":true,"symbol":"KCS-BTC","lastDealPrice":0.00090988,"buy":0.00090988,"sell":0.0009099,"change":0.00001032,"coinTypePair":"BTC","sort":0,"feeRate":0.001,"volValue":882.50568782,"high":0.0011,"datetime":1516159842000,"vol":986325.7026,"low":0.00072612,"changeRate":0.0115},
  
 */
+function Kucoin() {
+  CryptoService.call(this, "https://api.kucoin.com/v1/open/tick");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+Kucoin.prototype = Object.create(CryptoService.prototype);
+Kucoin.prototype.constructor = Kucoin;
+
+//CryptoService.PROVIDERS["Kucoin"] = new Kucoin();
+
+/**
+ * Return URL for all coins
+ */
+Kucoin.prototype.getAllCoinsURL = function() {
+  return this.url;
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+Kucoin.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data.data) {
+    var coin = data.data[i];
+    var symbol = coin.symbol.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+Kucoin.prototype.getCoinPriceKey = function() {
+  return "sell";
+}
+
 
 /**************************************************************************************/
 
@@ -391,6 +442,7 @@ quoine.prototype.getCoinPriceKey = function() {
 var PROVIDERS = [
   new Coinbin(),
   new quoine(),
+  new Kucoin(),
   new CoinMarketCap()
 ];
   
@@ -437,6 +489,7 @@ function getCoinPrice(symbol, service) {
   return _api(service).getCoinPrice(symbol);
  // return _api("quoine").getCoinPrice("BTCUSD");
 //  return _api("coinmarketcap").getCoinPrice("BTC");
+//  return _api("kucoin").getCoinPrice("BTC-USDT");
 }
 
 /**
