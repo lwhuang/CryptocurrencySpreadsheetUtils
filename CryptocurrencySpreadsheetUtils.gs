@@ -23,7 +23,6 @@
   
   
   # Cryptocurrency Spreadsheet Utils
-
   Provides useful functions for Google Sheets to get cryptocurrency prices and information.
   For example, to get the current price of Bitcoin you can enter:
   
@@ -44,14 +43,12 @@
   
       =getCoinAttr("ETH", "24h_volume_usd", "coinmarketcap")
       
-
   You can of course also implement your own crypto API partners if Coinbin and CoinMarketCap don't have what you need.
   
   Review the API documentation below to see specific attributes.
   
   
   Created by Brad Jasper (http://bradjasper.com/)
-
   v0.6 — 12/13/2017 — Cleaned up code (thanks @jeromedalbert)
   v0.5 — 11/26/2017 — Fixed multi-coin issue by sorting coins (thanks @jeromedalbert)
   v0.4 — 11/09/2017 — Fixed limit with CoinMarketCap API reponses
@@ -60,7 +57,6 @@
   v0.1 — 06/29/2017 — Initial release
   
   ## Planned
-
   - Handle coins with the same symbol
   - 1-click easy archiving to save data over time
   - Historical trade data
@@ -321,38 +317,13 @@ CoinMarketCap.prototype.getCoinPriceKey = function() {
   return "price_usd";
 }
 
+
 /**************************************************************************************/
 
 /**
  * quoine API (https://api.quoine.com//products/)
  
-{
-"id":"1",
-"product_type":"CurrencyPair",
-"code":"CASH",
-"name":" CASH Trading",
-"market_ask":14540.03957,
-"market_bid":14528.16041,
-"indicator":-1,
-"currency":"USD",
-"currency_pair_code":"BTCUSD",
-"symbol":"$",
-"btc_minimum_withdraw":null,
-"fiat_minimum_withdraw":null,
-"pusher_channel":"product_cash_btcusd_1",
-"taker_fee":0.0,
-"maker_fee":0.0,
-"low_market_bid":14338.02563,
-"high_market_ask":15198.99,
-"volume_24h":1222.425638419999999988,
-"last_price_24h":15053.10679,
-"last_traded_price":14530.81604,
-"last_traded_quantity":0.00889657,
-"quoted_currency":"USD",
-"base_currency":"BTC",
-"disabled":false,
-"exchange_rate":1.0
-}
+{"id":"1","product_type":"CurrencyPair","code":"CASH","name":" CASH Trading","market_ask":14540.03957,"market_bid":14528.16041,"indicator":-1,"currency":"USD","currency_pair_code":"BTCUSD","symbol":"$","btc_minimum_withdraw":null,"fiat_minimum_withdraw":null,"pusher_channel":"product_cash_btcusd_1","taker_fee":0.0,"maker_fee":0.0,"low_market_bid":14338.02563,"high_market_ask":15198.99,"volume_24h":1222.425638419999999988,"last_price_24h":15053.10679,"last_traded_price":14530.81604,"last_traded_quantity":0.00889657,"quoted_currency":"USD","base_currency":"BTC","disabled":false,"exchange_rate":1.0}
 */
 
 
@@ -384,8 +355,8 @@ quoine.prototype.getAllCoinsURL = function() {
 quoine.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data) {
-    var coin = data.Data[i];
-    var symbol = coin.currency_pair_code;//.toLowerCase();
+    var coin = data[i];
+    var symbol = coin.currency_pair_code.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -408,12 +379,19 @@ quoine.prototype.getCoinPriceKey = function() {
 /**************************************************************************************/
 
 /**
+ * Kucoin API (https://api.coinmarketcap.com/v1/)
+ 
+*/
+
+/**************************************************************************************/
+
+/**
  * Register Crypto API providers
  */
 var PROVIDERS = [
   new Coinbin(),
-  new CoinMarketCap(),
   new quoine(),
+  new CoinMarketCap()
 ];
   
 /**
@@ -457,6 +435,8 @@ function _api(service) {
  */
 function getCoinPrice(symbol, service) {
   return _api(service).getCoinPrice(symbol);
+ // return _api("quoine").getCoinPrice("BTCUSD");
+//  return _api("coinmarketcap").getCoinPrice("BTC");
 }
 
 /**
