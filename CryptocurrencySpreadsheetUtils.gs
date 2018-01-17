@@ -433,7 +433,119 @@ Kucoin.prototype.getCoinPriceKey = function() {
   return "sell";
 }
 
+/**************************************************************************************/
 
+/**
+ * cobinhood API (https://api.coinmarketcap.com/v1/)
+ https://api.cobinhood.com/v1/market/tickers/BTC-USD
+ 
+ {"success":true,"result":{"ticker":{"trading_pair_id":"BTC-USD","timestamp":1516169220000,"24h_high":"9498.9","24h_low":"6000.2","24h_open":"9351","24h_volume":"1.7163810400000004","last_trade_price":"6800.1","highest_bid":"6800.1","lowest_ask":"6800.1"}}}
+ 
+*/
+function cobinhood() {
+  CryptoService.call(this, "https://api.cobinhood.com/");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+cobinhood.prototype = Object.create(CryptoService.prototype);
+cobinhood.prototype.constructor = cobinhood;
+
+//CryptoService.PROVIDERS["cobinhood"] = new cobinhood();
+
+/**
+ * Return URL for all coins
+ */
+cobinhood.prototype.getAllCoinsURL = function() {
+  return this.url+"v1/market/tickers/";
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+cobinhood.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data.data) {
+    var coin = data.data[i];
+    var symbol = coin.symbol.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+cobinhood.prototype.getCoinPriceKey = function() {
+  return "sell";
+}
+
+
+/**************************************************************************************/
+
+/**
+ * exmo API
+ https://api.exmo.com/
+ 
+ {"BTC_USD":{"buy_price":"10778","sell_price":"10778.01","last_trade":"10778","high":"14825.90483508","low":"10410.1","avg":"12533.05328135","vol":"2344.0810234","vol_curr":"25264528.71104372","updated":1516190556},"BTC_EUR":{"buy_price":"9389.94559151","sell_price":"9389.9456","last_trade":"9389.9456","high":"12417.49241748","low":"9311","avg":"10375.79670883","vol":"406.73037614","vol_curr":"3819176.10583429","updated":1516190398},"BTC_RUB":{"buy_price":"611000","sell_price":"614999.99898989","last_trade":"610928.0247164","high":"808808.808","low":"588120.83513","avg":"694887.25288472","vol":"1067.05778646","vol_curr":"656240537.59916138","updated":1516190556}} 
+*/
+function exmo() {
+  CryptoService.call(this, "https://api.exmo.com/");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+exmo.prototype = Object.create(CryptoService.prototype);
+exmo.prototype.constructor = exmo;
+
+//CryptoService.PROVIDERS["exmo"] = new exmo();
+
+/**
+ * Return URL for all coins
+ */
+exmo.prototype.getAllCoinsURL = function() {
+  return this.url+"v1/ticker/";
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+exmo.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data) {
+    var coin = data[i];
+    var symbol = i.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+exmo.prototype.getCoinPriceKey = function() {
+  return "sell";
+}
 /**************************************************************************************/
 
 /**
@@ -443,6 +555,7 @@ var PROVIDERS = [
   new Coinbin(),
   new quoine(),
   new Kucoin(),
+  new exmo(),
   new CoinMarketCap()
 ];
   
@@ -487,9 +600,12 @@ function _api(service) {
  */
 function getCoinPrice(symbol, service) {
   return _api(service).getCoinPrice(symbol);
+  
+  //test
  // return _api("quoine").getCoinPrice("BTCUSD");
 //  return _api("coinmarketcap").getCoinPrice("BTC");
 //  return _api("kucoin").getCoinPrice("BTC-USDT");
+  //return _api("exmo").getCoinPrice("BTC_USDT");
 }
 
 /**
