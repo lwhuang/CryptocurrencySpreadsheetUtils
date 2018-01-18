@@ -546,6 +546,86 @@ exmo.prototype.parseAllCoinData = function(data) {
 exmo.prototype.getCoinPriceKey = function() {
   return "sell";
 }
+
+/**************************************************************************************/
+
+/**
+ * exx API
+ https://api.exx.com/data/v1/tickers
+ 
+ {
+   "btc_usdt" : {
+      "vol" : "105.7896",
+      "last" : "11548.79",
+      "buy" : "11400.42",
+      "sell" : "11560.29",
+      "weekRiseRate" : -28.26,
+      "riseRate" : 4.92,
+      "high" : "12532.98",
+      "low" : "10000.0",
+      "monthRiseRate" : -32.41
+   },
+   "eth_btc" : {
+      "vol" : 0.0,
+      "last" : 0,
+      "sell" : 0.0,
+      "buy" : 0.0,
+      "weekRiseRate" : 0.0,
+      "riseRate" : 0.0,
+      "high" : 0.0,
+      "low" : 0,
+      "monthRiseRate" : 0.0
+   }
+}
+
+ */
+function exx() {
+  CryptoService.call(this, "https://api.exx.com/");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+exx.prototype = Object.create(CryptoService.prototype);
+exx.prototype.constructor = exx;
+
+
+/**
+ * Return URL for all coins
+ */
+exx.prototype.getAllCoinsURL = function() {
+  return this.url+"data/v1/tickers";
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+exx.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data) {
+    var coin = data[i];
+    var symbol = i.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+exx.prototype.getCoinPriceKey = function() {
+  return "sell";
+}
+
 /**************************************************************************************/
 
 /**
@@ -556,6 +636,7 @@ var PROVIDERS = [
   new quoine(),
   new Kucoin(),
   new exmo(),
+  new exx(),
   new CoinMarketCap()
 ];
   
