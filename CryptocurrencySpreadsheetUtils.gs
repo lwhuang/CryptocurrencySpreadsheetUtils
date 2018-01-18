@@ -298,7 +298,7 @@ CoinMarketCap.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data) {
     var coin = data[i];
-    var symbol = coin.symbol.toLowerCase();
+    var symbol = coin.symbol;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -356,7 +356,7 @@ quoine.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data) {
     var coin = data[i];
-    var symbol = coin.currency_pair_code.toLowerCase();
+    var symbol = coin.currency_pair_code;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -414,7 +414,7 @@ Kucoin.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data.data) {
     var coin = data.data[i];
-    var symbol = coin.symbol.toLowerCase();
+    var symbol = coin.symbol;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -527,7 +527,7 @@ exmo.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data) {
     var coin = data[i];
-    var symbol = i.toLowerCase();
+    var symbol = i;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -606,7 +606,7 @@ exx.prototype.parseAllCoinData = function(data) {
   var coins = {};
   for (var i in data) {
     var coin = data[i];
-    var symbol = i.toLowerCase();
+    var symbol = i;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
