@@ -597,6 +597,7 @@ exx.prototype.getAllCoinsURL = function(symbol) {
   return this.url+"data/v1/tickers";
 }
 
+
 /**
  * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
  *
@@ -628,6 +629,62 @@ exx.prototype.getCoinPriceKey = function() {
 /**************************************************************************************/
 
 /**
+ * tidex API 
+ https://api.tidex.com/api/3/ticker/btc_usdt
+ 
+{"btc_usdt":{"high":11719.0159029,"low":9291.40091,"avg":10505.20840645,"vol":75462.5433176016479187,"vol_cur":7.02864737,"last":11678.3453633,"buy":11625.9820184,"sell":11730.7087082,"updated":1516286220}} 
+*/
+function tidex() {
+  CryptoService.call(this, "https://api.tidex.com/");
+}
+
+/**
+ * Setup prototype inheritence for CoinMarketCap. This lets CoinMarketCap use CryptoService as a base class
+ * If you implement your own class, you'll need to add this.
+ */
+tidex.prototype = Object.create(CryptoService.prototype);
+tidex.prototype.constructor = tidex;
+
+
+/**
+ * Return URL for all coins
+ */
+tidex.prototype.getAllCoinsURL = function(symbol) {
+  return this.url+"api/3/ticker/" + symbol;
+}
+
+/**
+ * Parse data from all coins. For CoinMarketCap we have to lowercase the symbol names.
+ *
+ * If there are coins with the same symbol, only store the one with the highest market cap.
+ */
+tidex.prototype.parseAllCoinData = function(data) {
+  var coins = {};
+  for (var i in data) {
+    var coin = data[i];
+    var symbol = i;//.toLowerCase();
+
+    if (coins[symbol] == undefined) {
+      coins[symbol] = coin;
+    }
+ //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
+ //     coins[symbol] = coin;
+//    }
+  }
+  return coins;
+}
+
+/**
+ * Return key for price
+ */
+tidex.prototype.getCoinPriceKey = function() {
+  return "last";
+}
+
+
+/**************************************************************************************/
+
+/**
  * Register Crypto API providers
  */
 var PROVIDERS = [
@@ -637,6 +694,7 @@ var PROVIDERS = [
   new cobinhood(),
   new exmo(),
   new exx(),
+  new tidex(),
   new CoinMarketCap()
 ];
   
