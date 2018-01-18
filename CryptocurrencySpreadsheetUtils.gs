@@ -109,17 +109,17 @@ CryptoService.prototype.fetchURL = function(url) {
 /**
  * Fetch and parse all coins
  */
-CryptoService.prototype.fetchAllCoinInfo = function(url) {
-  return this.fetchURL(this.getAllCoinsURL());
+CryptoService.prototype.fetchAllCoinInfo = function(symbol) {
+	return this.fetchURL(this.getAllCoinsURL(symbol));
 }
 
 /**
  * Update all coin information. API should have at least once function that
  * can get bulk price information—otherwise it'll be too slow.
  */
-CryptoService.prototype.updateAllCoinInfo = function() {
+CryptoService.prototype.updateAllCoinInfo = function(symbol) {
   Logger.log("Updating all coin information");
-  var data = this.fetchAllCoinInfo();
+  var data = this.fetchAllCoinInfo(symbol);
   this.coins = this.parseAllCoinData(data);
   Logger.log("Updated " + Object.keys(this.coins).length + " coins");
 }
@@ -138,8 +138,8 @@ CryptoService.prototype.parseAllCoinData = function(data) {
  * Get all information for a coin. If a coin doesn't exist, attempt to fetch it.
  */
 CryptoService.prototype.getCoin = function(symbol) {
-  symbol = symbol.toLowerCase();
-  if (!this.coins[symbol]) this.updateAllCoinInfo();
+  //symbol = symbol.toLowerCase();
+  if (!this.coins[symbol]) this.updateAllCoinInfo(symbol);
 
   return this.coins[symbol];
 }
@@ -188,7 +188,7 @@ CryptoService.prototype.getCoinPriceKey = function(keyAttrName) {
  * Get the URL for all coin price information, used in subclasses
  */
 
-CryptoService.prototype.getAllCoinsURL = function() {
+CryptoService.prototype.getAllCoinsURL = function(symbol) {
   throw new Error("Impelement in sub-class");
 }
 
@@ -227,7 +227,7 @@ CryptoService.PROVIDERS["coinbin"] = new Coinbin();
 /**
  * Return URL for all coins
  */
-Coinbin.prototype.getAllCoinsURL = function() {
+Coinbin.prototype.getAllCoinsURL = function(symbol) {
   return this.url + "coins";
 }
 
@@ -285,7 +285,7 @@ CoinMarketCap.prototype.constructor = CoinMarketCap;
 /**
  * Return URL for all coins
  */
-CoinMarketCap.prototype.getAllCoinsURL = function() {
+CoinMarketCap.prototype.getAllCoinsURL = function(symbol) {
   return this.url + "ticker/?limit=0";
 }
 
@@ -343,7 +343,7 @@ quoine.prototype.constructor = quoine;
 /**
  * Return URL for all coins
  */
-quoine.prototype.getAllCoinsURL = function() {
+quoine.prototype.getAllCoinsURL = function(symbol) {
   return this.url;
 }
 
@@ -401,7 +401,7 @@ Kucoin.prototype.constructor = Kucoin;
 /**
  * Return URL for all coins
  */
-Kucoin.prototype.getAllCoinsURL = function() {
+Kucoin.prototype.getAllCoinsURL = function(symbol) {
   return this.url;
 }
 
@@ -458,8 +458,8 @@ cobinhood.prototype.constructor = cobinhood;
 /**
  * Return URL for all coins
  */
-cobinhood.prototype.getAllCoinsURL = function() {
-  return this.url+"v1/market/tickers/";
+cobinhood.prototype.getAllCoinsURL = function(symbol) {
+  return this.url+"v1/market/tickers/" + symbol;
 }
 
 /**
@@ -469,9 +469,9 @@ cobinhood.prototype.getAllCoinsURL = function() {
  */
 cobinhood.prototype.parseAllCoinData = function(data) {
   var coins = {};
-  for (var i in data.data) {
-    var coin = data.data[i];
-    var symbol = coin.symbol.toLowerCase();
+ // for (var i in data.data) {
+    var coin = data.result.ticker;
+    var symbol = coin.trading_pair_id;//.toLowerCase();
 
     if (coins[symbol] == undefined) {
       coins[symbol] = coin;
@@ -479,7 +479,7 @@ cobinhood.prototype.parseAllCoinData = function(data) {
  //   else if (parseFloat(coin.market_cap_usd) > parseFloat(coins[symbol].market_cap_usd)) {
  //     coins[symbol] = coin;
 //    }
-  }
+ // }
   return coins;
 }
 
@@ -487,7 +487,7 @@ cobinhood.prototype.parseAllCoinData = function(data) {
  * Return key for price
  */
 cobinhood.prototype.getCoinPriceKey = function() {
-  return "sell";
+  return "last_trade_price";
 }
 
 
@@ -510,12 +510,11 @@ function exmo() {
 exmo.prototype = Object.create(CryptoService.prototype);
 exmo.prototype.constructor = exmo;
 
-//CryptoService.PROVIDERS["exmo"] = new exmo();
 
 /**
  * Return URL for all coins
  */
-exmo.prototype.getAllCoinsURL = function() {
+exmo.prototype.getAllCoinsURL = function(symbol) {
   return this.url+"v1/ticker/";
 }
 
@@ -594,7 +593,7 @@ exx.prototype.constructor = exx;
 /**
  * Return URL for all coins
  */
-exx.prototype.getAllCoinsURL = function() {
+exx.prototype.getAllCoinsURL = function(symbol) {
   return this.url+"data/v1/tickers";
 }
 
@@ -635,6 +634,7 @@ var PROVIDERS = [
   new Coinbin(),
   new quoine(),
   new Kucoin(),
+  new cobinhood(),
   new exmo(),
   new exx(),
   new CoinMarketCap()
@@ -707,6 +707,9 @@ function getCoinAttr(symbol, attr, service) {
  */
 function getCoinFloatAttr(symbol, attr, service) {
   return _api(service).getCoinFloatAttr(symbol, attr);
+  
+  //test
+  //return _api("cobinhood").getCoinFloatAttr("BTC-USD", "last_trade_price");
 }
 
 /**
